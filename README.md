@@ -44,10 +44,11 @@ In order to facilitate these solutions, we will need to first define an architec
 
 ### Cloud Provider
 
-AWS will be the cloud provider of choice
+AWS will be the cloud provider of choice.
 
 1. AWS is basically ubiquitous in the public cloud space.
 1. EKS is familiar to most audiences.
+1. I have hands-on experience operating Kubernetes via EKS, OpenShift, Rancher, and kubeadm-based deployments. Within AWS, EKS represents the quickest path to a supportable, production-ready Kubernetes platform.
 1. Terraform support is mature.
 
 ### Container Orchestration Engine
@@ -73,3 +74,12 @@ For this exercise, I like the simplicity of Python.
 1. FastAPI makes writing http handlers quite simple.
 1. Testing is also simplified using TestClient
 1. Python is another technology that a majority of DevOps-enabled engineers will have had exposure to.
+
+### CI/CD Platform Choice
+
+For most non-GitOps use cases, GitHub Actions is my preferred choice.
+
+1. GitHub Actions is broadly available and familiar, lowering the barrier to entry for reviewers and future contributors.
+1. Tight integration with pull requests enables fast feedback loops (tests, linting, and Terraform validation) and improves developer experience.
+1. It provides a simple path to building and publishing immutable container images, as well as deploying to EKS in a repeatable, automated way.
+1. While I like GitOps tooling (e.g., ArgoCD) in long-lived platforms, this exercise focuses on demonstrating repeatability and safe delivery without introducing additional control-plane components.
