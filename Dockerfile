@@ -2,6 +2,9 @@
 
 FROM python:3.13-slim AS runtime
 
+ARG VERSION=0.0.0
+ENV SETUPTOOLS_SCM_PRETEND_VERSION_FOR_AUTOMATER_WS=$VERSION
+
 ENV PYTHONDONTWRITEBYTECODE=1 \
   PYTHONUNBUFFERED=1 \
   PIP_DISABLE_PIP_VERSION_CHECK=1 \
@@ -17,13 +20,13 @@ RUN apt-get update \
 # Copy only metadata first for better layer caching
 COPY pyproject.toml README.md ./
 
+# Now copy the actual source
+COPY src ./src
+
 # Install your package (and deps) from pyproject
 # If you want dev tools inside the image, use .[dev]
 RUN python -m pip install --upgrade pip \
   && python -m pip install .
-
-# Now copy the actual source
-COPY src ./src
 
 # Re-install in case code changed after cached layer (fast for pure python)
 RUN python -m pip install .
