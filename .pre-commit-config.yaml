@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v6.0.0
     hooks:
       - id: check-yaml
       - id: end-of-file-fixer
@@ -13,11 +13,17 @@ repos:
       - id: terraform_validate
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.8
+    rev: v0.9.4
     hooks:
       - id: ruff
+        args: [--fix]
+      - id: ruff-format
 
-  - repo: https://github.com/helm/chart-testing
-    rev: v3.11.0
+  - repo: local
     hooks:
-      - id: ct-lint
+      - id: helm-chart-testing-install
+        name: helm chart-testing (ct install)
+        entry: ct install
+        language: system
+        pass_filenames: false
+        files: ^chart/

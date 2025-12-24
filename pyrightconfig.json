@@ -1,0 +1,9 @@
+{
+  "venvPath": "/Users/randall",
+  "venv": ".venv",
+  "executionEnvironments": [
+    {
+      "root": "app/src/automater_ws"
+    }
+  ]
+}
