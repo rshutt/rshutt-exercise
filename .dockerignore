@@ -1,0 +1,36 @@
+# VCS
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+
+# Virtualenvs
+.venv/
+venv/
+env/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Editor / OS noise
+.DS_Store
+.idea/
+.vscode/
+
+# Pre-commit
+.pre-commit/
+
+# Tests (optional: remove if you want them in the image)
+tests/
+
+# Local env files
+.env
+.env.*
