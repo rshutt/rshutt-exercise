@@ -83,3 +83,14 @@ For most non-GitOps use cases, GitHub Actions is my preferred choice.
 1. Tight integration with pull requests enables fast feedback loops (tests, linting, and Terraform validation) and improves developer experience.
 1. It provides a simple path to building and publishing immutable container images, as well as deploying to EKS in a repeatable, automated way.
 1. While I like GitOps tooling (e.g., ArgoCD) in long-lived platforms, this exercise focuses on demonstrating repeatability and safe delivery without introducing additional control-plane components.
+
+## Local Development
+
+This repository uses `pre-commit` to provide fast local feedback for common formatting and validation issues.
+
+To enable:
+
+```bash
+pip install pre-commit
+pre-commit install
+```
