@@ -12,7 +12,7 @@ name = "automater_ws"
 version = "0.0.0"
 description = "The Automater Web App"
 readme = "README.md"
-requires_python = ">3.13"
+requires-python = ">=3.13"
 authors = [{ name = "Randall Shutt"}]
 
 dependencies = []
