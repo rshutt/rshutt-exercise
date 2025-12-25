@@ -23,6 +23,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
   "pytest>=8.0",
+  "httpx",
   "ruff>=0.9",
   "pyright>=1.1"
 ]
