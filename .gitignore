@@ -1,2 +1,6 @@
 .pre-commit-cache/
 .ruff_cache/
+.venv/
+__pycache__/
+.pytest_cache/
+*.egg-info/

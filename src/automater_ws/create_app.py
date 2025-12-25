@@ -9,7 +9,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from automater_ws.routes.health import router as app_router
+from automater_ws.routes.health import router as health_router
+from automater_ws.routes.root import router as root_router
 from automater_ws.version import get_version
 
 log = logging.getLogger("automater_ws")
@@ -41,6 +42,7 @@ def create_app() -> FastAPI:
         lifespan=app_lifespan,
     )
 
-    app.include_router(app_router)
+    app.include_router(health_router)
+    app.include_router(root_router)
 
     return app
