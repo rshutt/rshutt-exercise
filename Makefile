@@ -9,6 +9,17 @@ IMAGE           := $(APP_NAME)
 VENV            := .venv
 PIP             := $(VENV)/bin/pip
 PYTHON          := $(VENV)/bin/python
+TF              ?= terraform
+TF_AUTO_APPROVE ?= false
+AWS_PROFILE     ?= org-admin
+
+TF_APPLY_FLAGS :=
+ifeq ($(TF_AUTO_APPROVE),true)
+  TF_APPLY_FLAGS += -auto-approve
+endif
+
+
+export AWS_PROFILE
 
 # Version to bake into setuptools_scm (Docker build-arg)
 # Prefer git tag; fall back to short SHA; then "dev"
@@ -18,7 +29,14 @@ VERSION         ?= $(shell git describe --tags --always --dirty 2>/dev/null || e
 TAG             ?= $(VERSION)
 
 # ECR tag
-ECR_IMAGE       := $(ECR_REGISTRY)/$(ECR_REPO):$(TAG)
+ECR_IMAGE       := $(ECR_REGISTRY)/$(ECR_REPO):$(TAG)o
+
+# ==== helpers ====
+define tf_run
+	cd $(1) && \
+	$(TF) init && \
+	$(TF) $(2) $(TF_APPLY_FLAGS)
+endef
 
 .PHONY: help
 help:
@@ -68,6 +86,46 @@ unit_test: venv
 clean:
 	rm -rf $(VENV)
 	rm -rf ./src/*.egg-info
+
+.PHONY: tf-bootstrap
+tf-bootstrap:
+	@echo "==> Bootstrapping Terraform state (S3 + DynamoDB)"
+	$(call tf_run,infra/aws/bootstrap/00-tf-state,apply)
+
+# ---- org / guardrails ----
+
+.PHONY: tf-org
+tf-org:
+	@echo "==> Applying AWS Organizations + SCPs"
+	$(call tf_run,infra/aws/org/00-org,apply)
+
+.PHONY: tf-log-archive
+tf-log-archive:
+	@echo "==> Applying Log Archive / Org CloudTrail"
+	$(call tf_run,infra/aws/security/10-log-archive,apply)
+
+.PHONY: tf-cost
+tf-cost:
+	@echo "==> Applying Cost Guardrails"
+	$(call tf_run,infra/aws/cost/20-cost-guardrails,apply)
+
+# ---- plan targets (safe) ----
+
+.PHONY: tf-plan-org tf-plan-log tf-plan-cost
+
+tf-plan-org:
+	$(call tf_run,infra/aws/org/00-org,plan)
+
+tf-plan-log:
+	$(call tf_run,infra/aws/security/10-log-archive,plan)
+
+tf-plan-cost:
+	$(call tf_run,infra/aws/cost/20-cost-guardrails,plan)
+
+# ---- meta ----
+
+.PHONY: tf-all
+tf-all: tf-org tf-log-archive tf-cost
 
 .PHONY: all
 all: build push

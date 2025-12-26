@@ -27,3 +27,13 @@ variable "account_email_domain" {
   type        = string
   description = "Use a domain you control; you can use plus-addressing like you+aws-security@domain.com"
 }
+
+variable "aws_profile" {
+  type    = string
+  default = "org-root"
+}
+
+variable "admin_email_user" {
+  type    = string
+  default = "root"
+}
