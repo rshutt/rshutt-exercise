@@ -111,7 +111,7 @@ tf-cost:
 
 # ---- plan targets (safe) ----
 
-.PHONY: tf-plan-org tf-plan-log tf-plan-cost
+.PHONY: tf-plan-org tf-plan-log tf-plan-cost tf-plan-bootstrap
 
 tf-plan-org:
 	$(call tf_run,infra/aws/org/00-org,plan)
@@ -121,6 +121,11 @@ tf-plan-log:
 
 tf-plan-cost:
 	$(call tf_run,infra/aws/cost/20-cost-guardrails,plan)
+
+tf-plan-bootstrap:
+	$(call tf_run,infra/aws/bootstrap/00-tf-state,plan)
+
+
 
 # ---- meta ----
 

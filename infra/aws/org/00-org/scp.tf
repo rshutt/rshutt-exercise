@@ -46,8 +46,6 @@ module "scp_protect_logging" {
         Sid    = "DenyDisablingS3PublicAccessBlock"
         Effect = "Deny"
         Action = [
-          "s3:PutAccountPublicAccessBlock",
-          "s3:PutBucketPublicAccessBlock",
           "s3:DeleteAccountPublicAccessBlock",
           "s3:DeleteBucketPublicAccessBlock"
         ]
