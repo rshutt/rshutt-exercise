@@ -55,21 +55,21 @@ AWS will be the cloud provider of choice.
 
 EKS is clearly the best choice here
 
-1. Since immutable infrastructure is part of the solution, using kind or k3s does not allow us to demonstrate this nor does using ECS.
-1. Will show a clear demarcation between the infra component builds and the CI/CD workflow to deploy the app.
-1. Feels less "demo-only"
+1. EKS deployment, configuration, and operations are well-known skills in most organizations.
+1. Provides a clear demarcation between the infra component builds, and the CI/CD workflow to deploy the app.
+1. Feels less "demo-only" than standing up a `kind` instance.
 
 ### IaC platform
 
-Terraform is my preferred choice, though similar could be done using CloudFormation if there is pushback.
+Terraform is my preferred choice, though this is not always the case with customers
 
 1. Excellent support for AWS and EKS
 1. Arguably, the platform agnostic industry standard for IaC.
-1. A majority of DevOps-enabled engineers, both software and infra, are familiar with Terraform and HCL at this point.
+1. Most DevOps-enabled engineers, both software and infra, are familiar with Terraform and HCL at this point.
 
 ### Application Language/Architecture
 
-For this exercise, I like the simplicity of Python.
+For this engagement, I like the simplicity of Python.
 
 1. FastAPI makes writing http handlers quite simple.
 1. Testing is also simplified using TestClient
@@ -79,10 +79,9 @@ For this exercise, I like the simplicity of Python.
 
 For most non-GitOps use cases, GitHub Actions is my preferred choice.
 
-1. GitHub Actions is broadly available and familiar, lowering the barrier to entry for reviewers and future contributors.
-1. Tight integration with pull requests enables fast feedback loops (tests, linting, and Terraform validation) and improves developer experience.
-1. It provides a simple path to building and publishing immutable container images, as well as deploying to EKS in a repeatable, automated way.
-1. While I like GitOps tooling (e.g., ArgoCD) in long-lived platforms, this exercise focuses on demonstrating repeatability and safe delivery without introducing additional control-plane components.
+1. GitHub Actions is broadly available and familiar.
+1. Integration with pull requests enables fast feedback.
+1. Fully capable of executing the both infrastructure and application builds and deployments
 
 ## Local Development
 
@@ -93,4 +92,68 @@ To enable:
 ```bash
 pip install pre-commit
 pre-commit install
+```
+
+## The automater_ws Python application
+
+### High level
+
+This application is quite basic as it is an example application that outputs the requested output when the `/` URI is accessed.
+
+- Runs in python3.13 or newer.
+- Using PEP 517 / PEP 621 with setuptools + pip.
+- Poetry was not chosen due to it wanting to "own" the workflows related to build.
+- Uses pyproject.toml to define the various confiuration variables required for the packaging.
+- Unit testing enabled via pytest.
+- Integration testing should and will be done in the repo's ci/cd in orchestration with the infrastructure.
+- Uses FastAPI since that seems quite straightforward and also has the easy access to TestClient.
+- Uses a routes/ subdir approach to populate the API endpoints.
+- Adds 2 additional routes to make kubernetes readiness and liveness checks seamless.
+- Leverages the top level Makefile to create, test, and run the application in a container.
+- Requires Docker Desktop (or equivallent containervisor)
+- Requires VERSION come from either the git repository's tag, or overrideen with the VERSION variable when running `make`
+
+## The AWS / Terraform tooling
+
+### AWS Infrastructure (Multi-Account, Guardrail-First)
+
+The `infra/` directory contains all AWS infrastructure managed via Terraform.
+It follows a single-repo, multi-account model with explicit permssions and roles.
+
+The structure and ordering are intentional and optimized for:
+
+- security and auditability
+- cost control
+- clarity of work
+
+#### Account model
+
+This repo assumes an AWS Organizations layout with distinct responsibilities:
+
+- Management account
+  - AWS Organizations
+  - Service Control Policies (SCPs)
+  - Cost guardrails (budgets, anomaly detection)
+
+- Log Archive / Security account
+  - Centralized CloudTrail (organization trail)
+  - Immutable-ish log storage (S3 + KMS)
+  - Audit isolation from workload accounts
+
+Workload accounts (dev/prod) are intentionally excluded here and live under
+`infra/aws/workloads/` when needed.
+
+---
+
+#### Directory layout & ordering
+
+```text
+infra/aws/
+  org/
+    00-organizations/
+  security/
+    10-log-archive/
+  cost/
+    20-cost-guardrails/
+  modules/
 ```

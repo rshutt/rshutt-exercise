@@ -1,0 +1,4 @@
+home_region           = "us-east-1"
+account_email_domain  = "randallman.net"
+allowed_regions       = ["us-east-1", "us-west-2"]
+admin_email_user      = "root"

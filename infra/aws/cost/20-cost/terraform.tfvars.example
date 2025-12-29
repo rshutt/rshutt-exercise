@@ -1,0 +1,4 @@
+home_region       = "us-east-1"
+alert_emails      = [
+  "randall@randallman.net"
+]
