@@ -16,3 +16,11 @@ variable "retention_days" {
   type    = number
   default = 14
 }
+
+variable "log_archive_profile" {
+  type = string
+}
+
+variable "management_profile" {
+  type = string
+}

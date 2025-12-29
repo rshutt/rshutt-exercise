@@ -11,4 +11,6 @@ data "terraform_remote_state" "org" {
 locals {
   org_id                 = data.terraform_remote_state.org.outputs.org_id
   log_archive_account_id = data.terraform_remote_state.org.outputs.log_archive_account_id
+  management_account_id  = data.terraform_remote_state.org.outputs.management_account_id
+  trail_arn              = "arn:aws:cloudtrail:us-east-1:${local.management_account_id}:trail/${var.trail_name}"
 }

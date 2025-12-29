@@ -17,6 +17,31 @@ resource "aws_kms_key" "cloudtrail" {
         Resource  = "*"
       },
       {
+        Sid    = "AllowCloudTrailUse"
+        Effect = "Allow"
+        Principal = {
+          Service = "cloudtrail.amazonaws.com"
+        }
+        Action = [
+          "kms:Encrypt",
+          "kms:Decrypt",
+          "kms:ReEncrypt*",
+          "kms:GenerateDataKey*",
+          "kms:DescribeKey",
+          "kms:CreateGrant"
+        ]
+        Resource = "*"
+        Condition = {
+          StringEquals = {
+            "kms:ViaService"            = "cloudtrail.${data.aws_region.current.id}.amazonaws.com",
+            "kms:GrantIsForAWSResource" = "true"
+          }
+          StringLike = {
+            "kms:EncryptionContext:aws:cloudtrail:arn" = "arn:aws:cloudtrail:*:*:trail/*"
+          }
+        }
+      },
+      {
         Sid       = "AllowCloudTrailUseOfTheKey"
         Effect    = "Allow"
         Principal = { Service = "cloudtrail.amazonaws.com" }
@@ -24,7 +49,9 @@ resource "aws_kms_key" "cloudtrail" {
           "kms:GenerateDataKey*",
           "kms:Decrypt",
           "kms:Encrypt",
-          "kms:DescribeKey"
+          "kms:ReEncrypt*",
+          "kms:DescribeKey",
+          "kms:CreateGrant"
         ]
         Resource = "*"
         Condition = {
@@ -33,7 +60,7 @@ resource "aws_kms_key" "cloudtrail" {
             "kms:ViaService"    = "cloudtrail.${data.aws_region.current.id}.amazonaws.com"
           },
           StringLike = {
-            "kms:EncryptionContext:aws:cloudtrail:arn" = "arn:aws:cloudtrail*:${local.org_id}:trail/${var.trail_name}"
+            "kms:EncryptionContext:aws:cloudtrail:arn" = "arn:aws:cloudtrail:*:*:trail/*"
           }
         }
       }

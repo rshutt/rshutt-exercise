@@ -20,8 +20,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "cloudtrail" {
 
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm     = "aws:kms"
-      kms_master_key_id = aws_kms_key.cloudtrail.arn
+      sse_algorithm = "AES256"
     }
   }
 }
@@ -49,17 +48,27 @@ data "aws_iam_policy_document" "cloudtrail_bucket_policy" {
     effect    = "Allow"
     actions   = ["s3:GetBucketAcl", "s3:GetBucketLocation"]
     resources = [aws_s3_bucket.cloudtrail.arn]
+
     principals {
       type        = "Service"
       identifiers = ["cloudtrail.amazonaws.com"]
     }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceArn"
+      values   = [local.trail_arn]
+    }
   }
 
   statement {
-    sid       = "AWSCloudTrailWrite"
-    effect    = "Allow"
-    actions   = ["s3:PutObject"]
-    resources = ["${aws_s3_bucket.cloudtrail.arn}/AWSLogs/${local.org_id}/*"]
+    sid     = "AWSCloudTrailWrite"
+    effect  = "Allow"
+    actions = ["s3:PutObject"]
+
+    resources = [
+      "${aws_s3_bucket.cloudtrail.arn}/AWSLogs/${local.management_account_id}/*"
+    ]
 
     principals {
       type        = "Service"
@@ -71,10 +80,50 @@ data "aws_iam_policy_document" "cloudtrail_bucket_policy" {
       variable = "s3:x-amz-acl"
       values   = ["bucket-owner-full-control"]
     }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceArn"
+      values   = [local.trail_arn]
+    }
+  }
+
+  statement {
+    sid     = "AWSCloudTrailOrganizationWrite"
+    effect  = "Allow"
+    actions = ["s3:PutObject"]
+    resources = [
+      "${aws_s3_bucket.cloudtrail.arn}/AWSLogs/${local.org_id}/*"
+    ]
+
+    principals {
+      type        = "Service"
+      identifiers = ["cloudtrail.amazonaws.com"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "s3:x-amz-acl"
+      values   = ["bucket-owner-full-control"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceArn"
+      values   = [local.trail_arn]
+    }
   }
 }
 
 resource "aws_s3_bucket_policy" "cloudtrail" {
   bucket = aws_s3_bucket.cloudtrail.id
   policy = data.aws_iam_policy_document.cloudtrail_bucket_policy.json
+}
+
+resource "aws_s3_bucket_ownership_controls" "cloudtrail" {
+  bucket = aws_s3_bucket.cloudtrail.id
+
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
 }

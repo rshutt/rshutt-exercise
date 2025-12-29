@@ -9,3 +9,8 @@ output "log_archive_account_id" {
 output "org_id" {
   value = aws_organizations_organization.this.id
 }
+
+output "management_account_id" {
+  description = "AWS Organizations management account ID"
+  value       = aws_organizations_organization.this.master_account_id
+}

@@ -2,3 +2,6 @@ home_region = "us-east-1"
 trail_name  = "org-trail"
 log_bucket_name = "rshutt-example-log"
 retention_days = 14
+log_archive_profile = "log-archive"
+management_profile = "org-root"
+"
