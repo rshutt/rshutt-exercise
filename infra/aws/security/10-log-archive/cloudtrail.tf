@@ -6,6 +6,7 @@ resource "aws_cloudtrail" "org" {
   include_global_service_events = true
   enable_logging                = true
   is_multi_region_trail         = true
+  enable_log_file_validation    = true
 
   event_selector {
     read_write_type           = "All"

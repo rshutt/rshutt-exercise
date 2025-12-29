@@ -107,7 +107,12 @@ tf-log-archive:
 .PHONY: tf-cost
 tf-cost:
 	@echo "==> Applying Cost Guardrails"
-	$(call tf_run,infra/aws/cost/20-cost-guardrails,apply)
+	$(call tf_run,infra/aws/cost/20-cost,apply)
+
+.PHONY: tf-guardduty
+tf-guardduty:
+	@echo "==> Applying Guardduty"
+	$(call tf_run,infra/aws/org/20-guardduty,apply)
 
 # ---- plan targets (safe) ----
 
@@ -120,17 +125,19 @@ tf-plan-log:
 	$(call tf_run,infra/aws/security/10-log-archive,plan)
 
 tf-plan-cost:
-	$(call tf_run,infra/aws/cost/20-cost-guardrails,plan)
+	$(call tf_run,infra/aws/cost/20-cost,plan)
 
 tf-plan-bootstrap:
 	$(call tf_run,infra/aws/bootstrap/00-tf-state,plan)
 
+tf-plan-guardduty:
+	$(call tf_run,infra/aws/org/20-guardduty,plan)
 
 
 # ---- meta ----
 
 .PHONY: tf-all
-tf-all: tf-org tf-log-archive tf-cost
+tf-all: tf-bootstrap tf-org tf-log-archive tf-cost tf-guardduty
 
 .PHONY: all
 all: build push
