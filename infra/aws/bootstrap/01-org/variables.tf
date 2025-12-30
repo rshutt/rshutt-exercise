@@ -23,6 +23,11 @@ variable "log_archive_account_name" {
   default = "log-archive"
 }
 
+variable "workload_account_name" {
+  type    = string
+  default = "workload"
+}
+
 variable "account_email_domain" {
   type        = string
   description = "Use a domain you control; you can use plus-addressing like you+aws-security@domain.com"

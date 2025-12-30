@@ -89,7 +89,7 @@ clean:
 
 .PHONY: tf-bootstrap
 tf-bootstrap:
-	@echo "==> Bootstrapping Terraform state (S3 + DynamoDB)"
+	@echo "==> Bootstrapping Terraform state (S3 + lockfile)"
 	$(call tf_run,infra/aws/bootstrap/00-tf-state,apply)
 
 # ---- org / guardrails ----
@@ -99,27 +99,47 @@ tf-org:
 	@echo "==> Applying AWS Organizations + SCPs"
 	$(call tf_run,infra/aws/org/00-org,apply)
 
+.PHONY: tf-bootstrap-iam
+tf-bootstrap-iam: tf-org
+	@echo "==> Applying AWS Bootstrap IAM"
+	$(call tf_run,infra/aws/org/01-bootstrap-iam,apply)
+
+.PHONY: tf-identity-center
+tf-identity-center: tf-org
+	@echo "==> Applying AWS Identity Center"
+	$(call tf_run,infra/aws/org/05-identity-center,apply)
+
 .PHONY: tf-log-archive
-tf-log-archive:
+tf-log-archive: tf-org tf-bootstrap-iam
 	@echo "==> Applying Log Archive / Org CloudTrail"
 	$(call tf_run,infra/aws/security/10-log-archive,apply)
 
 .PHONY: tf-cost
-tf-cost:
+tf-cost: tf-org tf-boostrap-iam
 	@echo "==> Applying Cost Guardrails"
 	$(call tf_run,infra/aws/cost/20-cost,apply)
 
-.PHONY: tf-guardduty
-tf-guardduty:
-	@echo "==> Applying Guardduty"
-	$(call tf_run,infra/aws/org/20-guardduty,apply)
+.PHONY: tf-guardduty-admin
+tf-guardduty-admin: tf-org tf-boostrap-iam
+	@echo "==> Applying Guardduty Admin"
+	$(call tf_run,infra/aws/org/20-guardduty-admin,apply)
 
+.PHONY: tf-guardduty
+tf-guardduty: tf-org tf-boostrap-iam
+	@echo "==> Applying Guardduty"
+	$(call tf_run,infra/aws/org/25-guardduty-admin,apply)
 # ---- plan targets (safe) ----
 
-.PHONY: tf-plan-org tf-plan-log tf-plan-cost tf-plan-bootstrap
+.PHONY: tf-plan-org tf-plan-log tf-plan-cost tf-plan-bootstrap tf-plan-guardduty-admin tf-plan-guardduty
 
 tf-plan-org:
 	$(call tf_run,infra/aws/org/00-org,plan)
+
+tf-plan-bootstrap-iam:
+	$(call tf_run,infra/aws/org/01-bootstrap-iam,plan)
+
+tf-plan-identity-center:
+	$(call tf_run,infra/aws/org/05-identity-center,plan)
 
 tf-plan-log:
 	$(call tf_run,infra/aws/security/10-log-archive,plan)
@@ -130,14 +150,17 @@ tf-plan-cost:
 tf-plan-bootstrap:
 	$(call tf_run,infra/aws/bootstrap/00-tf-state,plan)
 
-tf-plan-guardduty:
-	$(call tf_run,infra/aws/org/20-guardduty,plan)
+tf-plan-guardduty-admin:
+	$(call tf_run,infra/aws/org/20-guardduty-admin,plan)
 
+tf-plan-guardduty:
+	export AWS_PROFILE="security-sso"
+	$(call tf_run,infra/aws/org/25-guardduty,plan)
 
 # ---- meta ----
 
 .PHONY: tf-all
-tf-all: tf-bootstrap tf-org tf-log-archive tf-cost tf-guardduty
+tf-all: tf-bootstrap tf-org tf-identity-center tf-bootstrap-iam tf-log-archive tf-cost tf-guardduty-admin  tf-guardduty
 
 .PHONY: all
 all: build push

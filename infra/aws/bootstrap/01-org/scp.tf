@@ -1,5 +1,5 @@
 module "scp_region_allowlist" {
-  source      = "../../modules/scp"
+  source      = "../modules/scp"
   name        = "region-allowlist"
   description = "Deny API calls outside approved regions (protects security & spend)."
   policy_json = jsonencode({
@@ -26,7 +26,7 @@ module "scp_region_allowlist" {
 }
 
 module "scp_protect_logging" {
-  source      = "../../modules/scp"
+  source      = "../modules/scp"
   name        = "protect-logging"
   description = "Prevent disabling CloudTrail and tampering with log delivery."
   policy_json = jsonencode({
