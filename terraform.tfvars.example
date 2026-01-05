@@ -1,0 +1,8 @@
+name   = "brownst-eks"
+region = "us-east-1"
+tags = {
+  env = "dev"
+}
+node_ssh_key_name   = "bastion-keypair"
+node_ssh_source_sgs = ["sg-0a9469f5d91d750ca"]
+kubernetes_version  = "1.33"
