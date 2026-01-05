@@ -1,0 +1,7 @@
+name   = "brownst-eks"
+region = "us-east-1"
+node_ssh_key_name = "mykeypair"
+node_ssh_source_sgs = ["sg-###############"]
+tags = {
+  env = "dev"
+}

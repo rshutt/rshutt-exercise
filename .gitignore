@@ -13,6 +13,11 @@ __pycache__/
 **/terraform.tfstate*
 **/crash.log
 **/*.tfvars
+**/*.tfplan
+
 
 # MacOS
 .DS_Store
+
+#
+tmp/
