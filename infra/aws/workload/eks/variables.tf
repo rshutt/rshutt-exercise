@@ -20,3 +20,15 @@ variable "kubernetes_version" {
   type        = string
   default     = "1.30"
 }
+
+variable "node_ssh_key_name" {
+  type        = string
+  description = "EC2 key pair name for SSH to worker nodes"
+  default     = null
+}
+
+variable "node_ssh_source_sgs" {
+  type        = list(string)
+  description = "Arn of Security Group to match source host IPs on bastion"
+  default     = []
+}
