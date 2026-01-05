@@ -32,6 +32,8 @@ resource "aws_eks_node_group" "default" {
   node_role_arn   = aws_iam_role.node.arn
   subnet_ids      = local.private_subnet_ids
 
+  version = var.kubernetes_version
+
   scaling_config {
     desired_size = 2
     min_size     = 2
