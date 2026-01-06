@@ -3,7 +3,7 @@ data "terraform_remote_state" "org" {
   config = {
     bucket       = "tfstate-bucket-824123790769"
     key          = "aws/bootstrap/15-vpc.tfstate"
-    region       = "us-east-1"
+    region       = var.region
     use_lockfile = true
   }
 }

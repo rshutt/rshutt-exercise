@@ -1,0 +1,4 @@
+acme_email             = "randall@randallman.net"
+route53_hosted_public_zone_id = "Z08824862BHJTLIN60JP"
+# nlb_subnet_ids = ["subnet-...", "subnet-..."]
+# nlb_eip_allocation_ids = ["eipalloc-...", "eipalloc-..."]
