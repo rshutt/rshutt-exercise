@@ -18,7 +18,7 @@ resource "aws_vpc" "this" {
   enable_dns_support   = true
 
   tags = {
-    Name = "${var.vpn_name}-vpc"
+    Name = "${var.vpc_name}-vpc"
   }
 }
 
@@ -26,7 +26,7 @@ resource "aws_internet_gateway" "this" {
   vpc_id = aws_vpc.this.id
 
   tags = {
-    Name = "${var.vpn_name}-igw"
+    Name = "${var.vpc_name}-igw"
   }
 }
 
@@ -44,10 +44,10 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "${var.vpn_name}-public-${each.value.az}"
+    Name = "${var.vpc_name}-public-${each.value.az}"
 
     # EKS subnet discovery tags
-    "kubernetes.io/cluster/${var.vpn_name}" = "shared"
+    "kubernetes.io/cluster/${var.vpc_name}" = "shared"
     "kubernetes.io/role/elb"                = "1"
   }
 }
@@ -65,10 +65,10 @@ resource "aws_subnet" "private" {
   availability_zone = each.value.az
 
   tags = {
-    Name = "${var.vpn_name}-private-${each.value.az}"
+    Name = "${var.vpc_name}-private-${each.value.az}"
 
     # EKS subnet discovery tags
-    "kubernetes.io/cluster/${var.vpn_name}" = "shared"
+    "kubernetes.io/cluster/${var.vpc_name}" = "shared"
     "kubernetes.io/role/internal-elb"       = "1"
   }
 }
@@ -76,7 +76,7 @@ resource "aws_subnet" "private" {
 resource "aws_eip" "nat" {
   domain = "vpc"
   tags = {
-    Name = "${var.vpn_name}-nat-eip"
+    Name = "${var.vpc_name}-nat-eip"
   }
 }
 
@@ -85,7 +85,7 @@ resource "aws_nat_gateway" "this" {
   subnet_id     = aws_subnet.public[local.azs[0]].id
 
   tags = {
-    Name = "${var.vpn_name}-nat"
+    Name = "${var.vpc_name}-nat"
   }
 
   depends_on = [aws_internet_gateway.this]
@@ -100,7 +100,7 @@ resource "aws_route_table" "public" {
   }
 
   tags = {
-    Name = "${var.vpn_name}-public-rt"
+    Name = "${var.vpc_name}-public-rt"
   }
 }
 
@@ -119,7 +119,7 @@ resource "aws_route_table" "private" {
   }
 
   tags = {
-    Name = "${var.vpn_name}-private-rt"
+    Name = "${var.vpc_name}-private-rt"
   }
 }
 

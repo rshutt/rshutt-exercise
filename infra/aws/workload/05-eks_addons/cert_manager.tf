@@ -2,6 +2,55 @@
 # cert-manager + ACME (Route53 DNS-01)
 ########################################
 
+#
+# These locals are to handle a string issues with yamlencode in the helm_release
+#
+locals {
+  cm_issuer_staging = {
+    apiVersion = "cert-manager.io/v1"
+    kind       = "ClusterIssuer"
+    metadata   = { name = "letsencrypt-staging" }
+    spec = {
+      acme = {
+        email               = var.acme_email
+        server              = "https://acme-staging-v02.api.letsencrypt.org/directory"
+        privateKeySecretRef = { name = "letsencrypt-staging-account-key" }
+        solvers = [{
+          selector = { dnsZones = [local.route53_zone_name] }
+          dns01 = {
+            route53 = {
+              region       = local.region
+              hostedZoneID = var.route53_hosted_public_zone_id
+            }
+          }
+        }]
+      }
+    }
+  }
+
+  cm_issuer_prod = {
+    apiVersion = "cert-manager.io/v1"
+    kind       = "ClusterIssuer"
+    metadata   = { name = "letsencrypt-prod" }
+    spec = {
+      acme = {
+        email               = var.acme_email
+        server              = "https://acme-v02.api.letsencrypt.org/directory"
+        privateKeySecretRef = { name = "letsencrypt-prod-account-key" }
+        solvers = [{
+          selector = { dnsZones = [local.route53_zone_name] }
+          dns01 = {
+            route53 = {
+              region       = local.region
+              hostedZoneID = var.route53_hosted_public_zone_id
+            }
+          }
+        }]
+      }
+    }
+  }
+}
+
 resource "kubernetes_namespace_v1" "cert_manager" {
   metadata { name = "cert-manager" }
 }
@@ -91,48 +140,8 @@ resource "helm_release" "cert_manager" {
       }
 
       extraObjects = [
-        {
-          apiVersion = "cert-manager.io/v1"
-          kind       = "ClusterIssuer"
-          metadata   = { name = "letsencrypt-staging" }
-          spec = {
-            acme = {
-              email               = var.acme_email
-              server              = "https://acme-staging-v02.api.letsencrypt.org/directory"
-              privateKeySecretRef = { name = "letsencrypt-staging-account-key" }
-              solvers = [{
-                selector = { dnsZones = [local.route53_zone_name] }
-                dns01 = {
-                  route53 = {
-                    region       = local.region
-                    hostedZoneID = var.route53_hosted_public_zone_id
-                  }
-                }
-              }]
-            }
-          }
-        },
-        {
-          apiVersion = "cert-manager.io/v1"
-          kind       = "ClusterIssuer"
-          metadata   = { name = "letsencrypt-prod" }
-          spec = {
-            acme = {
-              email               = var.acme_email
-              server              = "https://acme-v02.api.letsencrypt.org/directory"
-              privateKeySecretRef = { name = "letsencrypt-prod-account-key" }
-              solvers = [{
-                selector = { dnsZones = [local.route53_zone_name] }
-                dns01 = {
-                  route53 = {
-                    region       = local.region
-                    hostedZoneID = var.route53_hosted_public_zone_id
-                  }
-                }
-              }]
-            }
-          }
-        }
+        yamlencode(local.cm_issuer_staging),
+        yamlencode(local.cm_issuer_prod)
       ]
     })
   ]
