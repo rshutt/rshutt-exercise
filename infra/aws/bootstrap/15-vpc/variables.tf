@@ -8,7 +8,7 @@ variable "aws_profile" {
   default = "org-root"
 }
 
-variable "vpn_name" {
+variable "vpc_name" {
   type    = string
-  default = "vpn"
+  default = "my"
 }
