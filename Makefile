@@ -89,78 +89,104 @@ clean:
 
 .PHONY: tf-bootstrap
 tf-bootstrap:
-	@echo "==> Bootstrapping Terraform state (S3 + lockfile)"
+	@echo "==> Bootstrapping infrastructure <=="
+	$(MAKE) tf-state
+	$(MAKE) tf-org
+	$(MAKE) tf-iam
+	$(MAKE) tf-identity-center
+	$(MAKE) tf-log-archive
+	$(MAKE) tf-vpc
+	$(MAKE) tf-cost
+	$(MAKE) tf-guardduty-admin
+	$(MAKE) tf-guardduty
+
+.PHONY:  tf-state
+tf-state:
+	@echo "==> Applying initial state bucket <=="
 	$(call tf_run,infra/aws/bootstrap/00-tf-state,apply)
 
-# ---- org / guardrails ----
-
-.PHONY: tf-org
+.PHONY:  tf-org
 tf-org:
-	@echo "==> Applying AWS Organizations + SCPs"
-	$(call tf_run,infra/aws/org/00-org,apply)
+	@echo "==> Creating base suborganzations <=="
+	$(call tf_run,infra/aws/bootstrap/01-org,apply)
 
-.PHONY: tf-bootstrap-iam
-tf-bootstrap-iam: tf-org
-	@echo "==> Applying AWS Bootstrap IAM"
-	$(call tf_run,infra/aws/org/01-bootstrap-iam,apply)
+.PHONY: tf-iam
+tf-iam:
+	@echo "==> Configuring IAM <=="
+	$(call tf_run,infra/aws/bootstrap/03-bootstrap-iam,apply)
 
 .PHONY: tf-identity-center
-tf-identity-center: tf-org
-	@echo "==> Applying AWS Identity Center"
-	$(call tf_run,infra/aws/org/05-identity-center,apply)
+tf-identity-center:
+	@echo "==> Configuring Identity Center (see notes to enable) <=="
+	$(call tf_run,infra/aws/boostrap/05-identity-center,apply)
 
 .PHONY: tf-log-archive
-tf-log-archive: tf-org tf-bootstrap-iam
-	@echo "==> Applying Log Archive / Org CloudTrail"
-	$(call tf_run,infra/aws/security/10-log-archive,apply)
+tf-log-archive:
+	@echo "==> Configuring log archive s3 bucket <=="
+	$(call tf_run,infra/aws/bootstrap/10-log-archive,apply)
+
+.PHONY: tf-vpc
+tf-vpc:
+	@echo "==> Configuring VPCs <=="
+	$(call tf_run,infra/aws/bootstrap/15-vpc,apply)
 
 .PHONY: tf-cost
-tf-cost: tf-org tf-boostrap-iam
-	@echo "==> Applying Cost Guardrails"
-	$(call tf_run,infra/aws/cost/20-cost,apply)
+tf-cost:
+	@echo "==> Configuring cost management <=="
+	$(call tf_run,infra/aws/bootstrap/20-cost,apply)
 
 .PHONY: tf-guardduty-admin
-tf-guardduty-admin: tf-org tf-boostrap-iam
-	@echo "==> Applying Guardduty Admin"
-	$(call tf_run,infra/aws/org/20-guardduty-admin,apply)
+tf-guardduty-admin:
+	@echo "==> Configuring guardduty perms  <=="
+	$(call tf_run,infra/aws/bootstrap/24-guardduty-admin)
 
 .PHONY: tf-guardduty
-tf-guardduty: tf-org tf-boostrap-iam
-	@echo "==> Applying Guardduty"
-	$(call tf_run,infra/aws/org/25-guardduty-admin,apply)
-# ---- plan targets (safe) ----
+tf-guardduty:
+	@echo "==> Configure Guard Duty <=="
+	$(call tf_run,infra/aws/bootstrap/25-guardduty,apply)
 
-.PHONY: tf-plan-org tf-plan-log tf-plan-cost tf-plan-bootstrap tf-plan-guardduty-admin tf-plan-guardduty
+.PHONY: tf-plan-state tf-plan-org tf-plan-iam tf-plan-identity-center tf-plan-log-archive tf-plan-vpc tf-plan-cost tf-plan-guardduty-admin tf-plan-guardduty
+
+tf-plan-state:
+	@echo "==> Planning initial state bucket <=="
+	$(call tf_run,infra/aws/bootstrap/00-state,plan)
 
 tf-plan-org:
-	$(call tf_run,infra/aws/org/00-org,plan)
+	@echo "==> Planning base suborganzations <=="
+	$(call tf_run,infra/aws/bootstrap/01-org,plan)
 
-tf-plan-bootstrap-iam:
-	$(call tf_run,infra/aws/org/01-bootstrap-iam,plan)
+tf-plan-iam:
+	@echo "==> Planning IAM <=="
+	$(call tf_run,infra/aws/bootstrap/03-bootstrap-iam,plan)
 
 tf-plan-identity-center:
-	$(call tf_run,infra/aws/org/05-identity-center,plan)
+	@echo "==> Planning Identity Center (see notes to enable) <=="
+	$(call tf_run,infra/aws/boostrap/05-identity-center,plan)
 
-tf-plan-log:
-	$(call tf_run,infra/aws/security/10-log-archive,plan)
+tf-plan-log-archive:
+	@echo "==> Planning log archive s3 bucket <=="
+	$(call tf_run,infra/aws/bootstrap/10-log-archive,plan)
+
+tf-plan-vpc:
+	@echo "==> Planning VPCs <=="
+	$(call tf_run,infra/aws/bootstrap/15-vpc,plan)
 
 tf-plan-cost:
-	$(call tf_run,infra/aws/cost/20-cost,plan)
-
-tf-plan-bootstrap:
-	$(call tf_run,infra/aws/bootstrap/00-tf-state,plan)
+	@echo "==> Planning cost management <=="
+	$(call tf_run,infra/aws/bootstrap/20-cost,plan)
 
 tf-plan-guardduty-admin:
-	$(call tf_run,infra/aws/org/20-guardduty-admin,plan)
+	@echo "==> Planning guardduty perms  <=="
+	$(call tf_run,infra/aws/bootstrap/24-guardduty-admin)
 
 tf-plan-guardduty:
-	export AWS_PROFILE="security-sso"
-	$(call tf_run,infra/aws/org/25-guardduty,plan)
+	@echo "==> Configure Guard Duty <=="
+	$(call tf_run,infra/aws/bootstrap/25-guardduty,plan)
 
 # ---- meta ----
 
-.PHONY: tf-all
-tf-all: tf-bootstrap tf-org tf-identity-center tf-bootstrap-iam tf-log-archive tf-cost tf-guardduty-admin  tf-guardduty
+.PHONY: tf-infra-all
+tf-infra-all: tf-state tf-org tf-iam tf-identity-center tf-log-archive tf-vpc tf-cost tf-guardduty-admin tf-guardduty
 
 .PHONY: all
 all: build push

@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     bucket       = "tfstate-bucket-824123790769"
-    key          = "aws/phase-2/eks_addons.tfstate"
+    key          = "aws/workload/eks_addons.tfstate"
     region       = "us-east-1"
     encrypt      = true
     use_lockfile = true

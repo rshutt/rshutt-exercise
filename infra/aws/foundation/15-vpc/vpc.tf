@@ -46,6 +46,10 @@ resource "aws_subnet" "public" {
   tags = {
     Name = "${var.vpc_name}-public-${each.value.az}"
   }
+
+  lifecycle {
+    ignore_changes = [tags]
+  }
 }
 
 resource "aws_subnet" "private" {
@@ -62,10 +66,10 @@ resource "aws_subnet" "private" {
 
   tags = {
     Name = "${var.vpc_name}-private-${each.value.az}"
+  }
 
-    # EKS subnet discovery tags
-    "kubernetes.io/cluster/${var.vpc_name}" = "shared"
-    "kubernetes.io/role/internal-elb"       = "1"
+  lifecycle {
+    ignore_changes = [tags]
   }
 }
 

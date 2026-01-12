@@ -2,7 +2,7 @@ data "terraform_remote_state" "org" {
   backend = "s3"
   config = {
     bucket       = "tfstate-bucket-824123790769"
-    key          = "aws/bootstrap/15-vpc.tfstate"
+    key          = "aws/foundation/15-vpc.tfstate"
     region       = var.region
     use_lockfile = true
   }

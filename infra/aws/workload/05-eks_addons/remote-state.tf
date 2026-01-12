@@ -2,7 +2,7 @@ data "terraform_remote_state" "eks" {
   backend = "s3"
   config = {
     bucket = "tfstate-bucket-824123790769"
-    key    = "aws/phase-2/eks.tfstate"
+    key    = "aws/workload/eks.tfstate"
     region = "us-east-1"
   }
 }
