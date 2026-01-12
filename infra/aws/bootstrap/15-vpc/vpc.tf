@@ -45,10 +45,6 @@ resource "aws_subnet" "public" {
 
   tags = {
     Name = "${var.vpc_name}-public-${each.value.az}"
-
-    # EKS subnet discovery tags
-    "kubernetes.io/cluster/${var.vpc_name}" = "shared"
-    "kubernetes.io/role/elb"                = "1"
   }
 }
 
