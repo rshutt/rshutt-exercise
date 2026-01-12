@@ -145,15 +145,17 @@ Workload accounts (dev/prod) are intentionally excluded here and live under
 
 ---
 
+#### Initialization of terraform
+
+This requires two manual steps - as an admin within your master account, you will need to create the tfstate bucket
+and generate a one-time use AWS token to bootstrap the ci roles.
+
 #### Directory layout & ordering
 
 ```text
 infra/aws/
-  org/
-    00-organizations/
-  security/
-    10-log-archive/
-  cost/
-    20-cost-guardrails/
-  modules/
+  bootstrap/
+    00-bootstrap/
+  foundation/
+  workload/
 ```

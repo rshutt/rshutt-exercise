@@ -1,0 +1,45 @@
+name: bootstrap-tf
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # ONE-TIME ONLY credentials (delete after bootstrap)
+      - name: Configure AWS (bootstrap admin)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.BOOTSTRAP_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.BOOTSTRAP_AWS_SECRET_ACCESS_KEY }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.5
+
+      - name: Terraform init
+        working-directory: terraform/bootstrap
+        run: terraform init -input=false
+
+      - name: Terraform apply (bootstrap)
+        working-directory: terraform/bootstrap
+        run: |
+          terraform apply -auto-approve -input=false \
+            -var-file=terraform.tfvars
+
+      - name: Show outputs (copy these)
+        working-directory: terraform/bootstrap
+        run: terraform output
