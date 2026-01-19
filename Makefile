@@ -92,7 +92,6 @@ tf-bootstrap:
 	@echo "==> Bootstrapping infrastructure <=="
 	$(MAKE) tf-state
 	$(MAKE) tf-org
-	$(MAKE) tf-iam
 	$(MAKE) tf-identity-center
 	$(MAKE) tf-log-archive
 	$(MAKE) tf-vpc
@@ -109,11 +108,6 @@ tf-state:
 tf-org:
 	@echo "==> Creating base suborganzations <=="
 	$(call tf_run,infra/aws/bootstrap/01-org,apply)
-
-.PHONY: tf-iam
-tf-iam:
-	@echo "==> Configuring IAM <=="
-	$(call tf_run,infra/aws/bootstrap/03-bootstrap-iam,apply)
 
 .PHONY: tf-identity-center
 tf-identity-center:
@@ -186,7 +180,7 @@ tf-plan-guardduty:
 # ---- meta ----
 
 .PHONY: tf-infra-all
-tf-infra-all: tf-state tf-org tf-iam tf-identity-center tf-log-archive tf-vpc tf-cost tf-guardduty-admin tf-guardduty
+tf-infra-all: tf-state tf-org tf-identity-center tf-log-archive tf-vpc tf-cost tf-guardduty-admin tf-guardduty
 
 .PHONY: all
 all: build push

@@ -1,4 +1,0 @@
-home_region       = "us-east-1"
-aws_profile       = "org-root"
-state_bucket_name = "tfstate-bucket-${ACCTID}"
-lock_table_name   = "tfstate-locktable"

@@ -17,10 +17,10 @@ variable "retention_days" {
   default = 14
 }
 
-variable "log_archive_profile" {
+variable "log_archive_role_arn" {
   type = string
 }
 
-variable "management_profile" {
+variable "management_role_arn" {
   type = string
 }

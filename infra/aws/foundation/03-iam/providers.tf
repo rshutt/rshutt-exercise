@@ -9,16 +9,14 @@ terraform {
 }
 
 provider "aws" {
-  region = var.home_region
-  assume_role {
-    role_arn = var.log_archive_role_arn
-  }
+  region = var.aws_region
 }
 
 provider "aws" {
-  alias  = "management"
-  region = var.home_region
+  alias  = "log_archive"
+  region = var.aws_region
+
   assume_role {
-    role_arn = var.management_role_arn
+    role_arn = "arn:aws:iam::${local.log_archive_account_id}:role/OrganizationAccountAccessRole"
   }
 }

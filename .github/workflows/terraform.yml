@@ -1,0 +1,50 @@
+name: terraform.yml
+
+on:
+  pull_request:
+    paths:
+      - "infra/aws/bootstrap/**"
+      - "infra/aws/foundation/**"
+  workflow_dispatch: {}
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        dir:
+          - infra/aws/foundation/01-org
+          - infra/aws/foundation/05-identity-center
+          - infra/aws/foundation/10-log-archive
+          - infra/aws/foundation/15-vpc
+          - infra/aws/foundation/20-cost
+          - infra/aws/foundation/24-guardduty-admin
+          - infra/aws/foundation/25-guardduty
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_TF_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.5
+
+      - name: Terraform init
+        working-directory: ${{ matrix.dir }}
+        run: terraform init -input=false
+
+      - name: Terraform plan
+        working-directory: ${{ matrix.dir }}

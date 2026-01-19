@@ -14,6 +14,7 @@ resource "aws_iam_openid_connect_provider" "github" {
 locals {
   github_subs = [
     "repo:${var.repo_slug}:ref:refs/heads/main",
+    "repo:${var.repo_slug}:ref:refs/tags/*",
     "repo:${var.repo_slug}:pull_request",
   ]
 }
